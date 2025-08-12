@@ -14,15 +14,21 @@ export const Empty: FunctionComponent<IEmptyProps> = function Empty(_props) {
 
 type TEntryRenderFn = (value: unknown, key: string | number) => ReactNode;
 
+type TForIterableValue<T> = Iterable<T> | null | undefined;
+type TForIterableValueGetter<T> = () => TForIterableValue<T>;
+
+type TForObjectValue<T> = Record<string, T> | null | undefined;
+type TForObjectValueGetter<T> = () => TForObjectValue<T>;
+
 interface IForIterableProps<T> {
-  of: Iterable<T> | null | undefined;
   in?: never;
+  of: TForIterableValueGetter<T> | TForIterableValue<T>;
   empty?: TFallback;
   children: ((value: T, index: number) => ReactNode) | ReactNode;
 }
 
 interface IForObjectProps<T> {
-  in: Record<string, T> | null | undefined;
+  in: TForObjectValueGetter<T> | TForObjectValue<T>;
   of?: never;
   empty?: TFallback;
   children: ((value: T, key: string) => ReactNode) | ReactNode;
@@ -37,12 +43,16 @@ export const For: TFor = function For<T>(props: TForProps<T>) {
   const hasOf = hasOwnProperty.call(props, 'of');
 
   if (isObjectMode && hasOf) {
-    console.warn('Both "in" and "of" props provided; "if" will be used');
+    console.warn('Both "in" and "of" provided; "in" will be used');
   }
 
   // Force use "in" value even if it's empty and "of" isn't
-  const obj = (props as IForObjectProps<T>).in;
-  const iterable = !isObjectMode ? (props as IForIterableProps<T>).of : undefined;
+  const objOrGetter = (props as IForObjectProps<T>).in;
+  const iterableOrGetter = !isObjectMode ? (props as IForIterableProps<T>).of : undefined;
+
+  const obj = typeof objOrGetter === 'function' ? objOrGetter() : objOrGetter;
+  const iterable = typeof iterableOrGetter === 'function' ? iterableOrGetter() : iterableOrGetter;
+
   const array: T[] | undefined = iterable
     ? Array.isArray(iterable)
       ? iterable

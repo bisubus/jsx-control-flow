@@ -32,12 +32,12 @@ interface IBaseBranchProps {
 }
 
 interface IElseIfConditionProps extends IBaseBranchProps {
-  cond: boolean;
   getCond?: never;
+  cond: unknown;
 }
 
 interface IElseIfConditionGetterProps extends IBaseBranchProps {
-  getCond: () => boolean;
+  getCond: () => unknown;
   cond?: never;
 }
 
@@ -53,16 +53,16 @@ interface IBaseConditionalProps {
 }
 
 interface IIfConditionProps extends IBaseConditionalProps {
-  cond: boolean;
   getCond?: never;
+  cond: unknown;
 }
 
 interface IIfConditionGetterProps extends IBaseConditionalProps {
-  getCond: () => boolean;
+  getCond: () => unknown;
   cond?: never;
 }
 
-type IIfProps = IIfConditionProps | IIfConditionGetterProps;
+type IIfProps = IIfConditionGetterProps | IIfConditionProps;
 
 type TIf = FunctionComponent<IIfProps> & {
   Then: typeof Then;

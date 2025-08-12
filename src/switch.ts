@@ -6,6 +6,8 @@ import {
   type ReactNode,
 } from 'react';
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
 type TRenderFn = () => ReactNode;
 
 interface ICaseProps<T = unknown> {
@@ -23,12 +25,23 @@ export const Default: FunctionComponent<IDefaultProps> = function Default() {
   return null;
 };
 
-interface ISwitchProps<T = unknown> {
+type TSwitchValueGetter<T, TVar = never> = (value?: TVar) => T;
+
+interface ISwitchValueProps<T = unknown> {
+  getValue?: never;
   value: T;
   children: ReactNode;
 }
 
-type TSwitch = FunctionComponent<ISwitchProps> & {
+interface ISwitchValueGetterProps<T = unknown> {
+  getValue: TSwitchValueGetter<T>;
+  value?: never;
+  children: ReactNode;
+}
+
+type TSwitchProps<T = unknown> = ISwitchValueGetterProps<T> | ISwitchValueProps<T>;
+
+type TSwitch = FunctionComponent<TSwitchProps> & {
   Case: typeof Case;
   Default: typeof Default;
 };
@@ -37,10 +50,18 @@ function renderNode(node: ReactNode | TRenderFn) {
   return typeof node === 'function' ? node() : node;
 }
 
-export const Switch: TSwitch = function Switch<T>(props: ISwitchProps<T>) {
-  const { value, children } = props;
+export const Switch: TSwitch = function Switch<T>(props: TSwitchProps<T>) {
+  const hasValueGetter = hasOwnProperty.call(props, 'getValue');
+  const hasValue = hasOwnProperty.call(props, 'value');
+
+  if (hasValueGetter && hasValue) {
+    console.warn('Both "getValue" and "value" provided; "getValue" will be used');
+  }
+
+  const value: T = hasValueGetter ? props.getValue!() : props.value!;
+
   // eslint-disable-next-line react-x/no-children-to-array
-  const rawChildrenArray = Children.toArray(children);
+  const rawChildrenArray = Children.toArray(props.children);
 
   const caseSlots = rawChildrenArray.filter(
     (child): child is ReactElement<ICaseProps<T>> => isValidElement(child) && child.type === Case,
