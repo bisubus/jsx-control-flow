@@ -1,0 +1,72 @@
+{
+  "name": "jsx-control-flow",
+  "version": "1.0.0",
+  "description": "Declarative control flow in JSX with <If>, <For>, <Switch>, <Let>. Cleaner than logic operators, ternaries, and .map()",
+  "keywords": [
+    "react",
+    "jsx",
+    "typescript",
+    "react-components"
+  ],
+  "author": "bisubus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bisubus/jsx-control-flow.git"
+  },
+  "type": "module",
+  "main": "dist/jsx-control-flow.umd.min.js",
+  "module": "dist/jsx-control-flow.es.min.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/jsx-control-flow.es.min.js",
+      "require": "./dist/jsx-control-flow.umd.min.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -b && vite build --emptyOutDir && vite build -- --minify",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "version": "mversion -n -m %s",
+    "version:bump": "mversion -n -m %s patch"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@types/node": "~24.2.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^9.30.1",
+    "eslint-config-prettier": "~10.1.8",
+    "eslint-plugin-import": "~2.32.0",
+    "eslint-plugin-prettier": "~5.5.4",
+    "eslint-plugin-react-dom": "~1.52.3",
+    "eslint-plugin-react-hooks": "~5.2.0",
+    "eslint-plugin-react-refresh": "~0.4.20",
+    "eslint-plugin-react-x": "~1.52.3",
+    "eslint-plugin-simple-import-sort": "~12.1.1",
+    "globals": "^16.3.0",
+    "mversion": "~2.0.1",
+    "prettier": "~3.6.2",
+    "terser": "~5.43.1",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.35.1",
+    "vite": "^7.0.4",
+    "vite-plugin-dts": "~4.5.4",
+    "vite-plugin-no-bundle": "~4.0.0",
+    "vitest": "~3.2.4"
+  }
+}
