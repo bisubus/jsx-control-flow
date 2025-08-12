@@ -78,9 +78,9 @@ export default defineConfig((configEnv): UserConfig => {
     ],
     test: {
       globals: true,
-      environment: 'node',
+      environment: 'jsdom',
       setupFiles: ['./vitest.setup.ts'],
-      include: ['src/**/__test__/**/*.[jt]s?(x)', 'src/**/*.(spec|test).[jt]s?(x)'],
+      include: ['src/**/__test__/**/*.ts?(x)', 'src/**/*.{test.ts?(x),test-d.ts}'],
     },
   } satisfies UserConfig;
 

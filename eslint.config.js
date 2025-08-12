@@ -66,7 +66,7 @@ export default typescriptEslint.config(
       // https://typescript-eslint.io/rules/
       '@typescript-eslint/consistent-type-definitions': 'warn',
       '@typescript-eslint/no-confusing-non-null-assertion': 'error',
-      '@typescript-eslint/no-empty-function': 'warn',
+      '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
       '@typescript-eslint/no-for-in-array': 'error',
