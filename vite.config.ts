@@ -31,6 +31,7 @@ export default defineConfig((configEnv): UserConfig => {
   const baseConfig = {
     base: './',
     build: {
+      target: 'es2015',
       outDir: './dist',
       emptyOutDir: false,
       cssCodeSplit: false,
