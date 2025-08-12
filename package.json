@@ -1,6 +1,6 @@
 {
   "name": "jsx-control-flow",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Declarative control flow in JSX with <If>, <For>, <Switch>, <Let>. Cleaner than logic operators, ternaries, and .map()",
   "keywords": [
     "react",
