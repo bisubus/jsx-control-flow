@@ -35,9 +35,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "vitest --run",
-    "test:watch": "vitest",
-    "version": "mversion -n -m %s",
-    "version:bump": "mversion -n -m %s patch"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -59,7 +57,6 @@
     "eslint-plugin-react-x": "~1.52.3",
     "eslint-plugin-simple-import-sort": "~12.1.1",
     "globals": "^16.3.0",
-    "mversion": "~2.0.1",
     "prettier": "~3.6.2",
     "terser": "~5.43.1",
     "typescript": "~5.8.3",
