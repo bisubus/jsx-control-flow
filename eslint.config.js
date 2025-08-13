@@ -42,6 +42,7 @@ export default typescriptEslint.config(
           singleQuote: true,
           printWidth: 100,
           singleAttributePerLine: true,
+          experimentalTernaries: true,
         },
       ],
     },
