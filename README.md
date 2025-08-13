@@ -122,15 +122,17 @@ Simplify conditional logic with `if`, `else if`, and `else` branches.
 
 ```jsx
 <If cond={isLoggedIn} else={<Login />}>
-  <Dashboard />
+  {() => <Dashboard />}
 </If>
 ```
 
-**With `<ElseIf>`:**
+**With `<Then>`, `<ElseIf>`, and `<Else>`:**
 
 ```jsx
 <If cond={isAdmin}>
-  <AdminPanel />
+  <Then>
+    <AdminPanel/>
+  </Then>
   <ElseIf cond={isUser}>
     <UserDashboard />
   </ElseIf>
@@ -140,11 +142,11 @@ Simplify conditional logic with `if`, `else if`, and `else` branches.
 </If>
 ```
 
-**Using getter functions for lazy evaluation of expressions:**
+**With getter functions for lazy evaluation of expressions:**
 
 ```jsx
 <If getCond={() => data.isReady}>
-  <ReadyState />
+  {() => <ReadyState />}
   <ElseIf getCond={() => data.isLoading}>
     <LoadingState />
   </ElseIf>
