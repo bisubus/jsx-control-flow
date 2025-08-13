@@ -1,83 +1,110 @@
 import { type FunctionComponent, isValidElement, type ReactElement, type ReactNode } from 'react';
 
-import type { TFallback } from './types';
+import { isFunction } from '@/utils';
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+import type { TFallback } from './types';
 
 export interface IEmptyProps {
   children: TFallback;
 }
-
-export const Empty: FunctionComponent<IEmptyProps> = function Empty(_props) {
+export const Empty = function Empty(_props: IEmptyProps) {
   return null;
-};
+} satisfies FunctionComponent<IEmptyProps>;
 
-type TEntryRenderFn = (value: unknown, key: string | number) => ReactNode;
+type TEmpty = typeof Empty;
 
+type TForIterableChildRenderFn<T> = (value: T, index: number) => ReactNode;
 type TForIterableValue<T> = Iterable<T> | null | undefined;
 type TForIterableValueGetter<T> = () => TForIterableValue<T>;
 
+type TForObjectChildRenderFn<T> = (value: T, key: string) => ReactNode;
 type TForObjectValue<T> = Record<string, T> | null | undefined;
 type TForObjectValueGetter<T> = () => TForObjectValue<T>;
 
-interface IForIterableProps<T> {
+type TForChildRenderFn<T> = (value: T, key: number | string) => ReactNode;
+
+interface IForIterableWithEmptyProp<T> {
   in?: never;
   of: TForIterableValueGetter<T> | TForIterableValue<T>;
   empty?: TFallback;
-  children: ((value: T, index: number) => ReactNode) | ReactNode;
+  children: TForIterableChildRenderFn<T>;
 }
 
-interface IForObjectProps<T> {
+interface IForIterableWithEmptySlot<T> {
+  in?: never;
+  of: TForIterableValueGetter<T> | TForIterableValue<T>;
+  empty?: never;
+  children: [TForObjectChildRenderFn<T>, ReactElement<IEmptyProps>];
+}
+
+type IForIterableProps<T> = IForIterableWithEmptyProp<T> | IForIterableWithEmptySlot<T>;
+
+interface IForObjectWithEmptyProp<T> {
   in: TForObjectValueGetter<T> | TForObjectValue<T>;
   of?: never;
   empty?: TFallback;
-  children: ((value: T, key: string) => ReactNode) | ReactNode;
+  children: (value: T, key: string) => ReactNode;
 }
 
-type TForProps<T> = IForObjectProps<T> | IForIterableProps<T>;
+interface IForObjectWithEmptySlot<T> {
+  in: TForObjectValueGetter<T> | TForObjectValue<T>;
+  of?: never;
+  empty?: never;
+  children: [(value: T, key: string) => ReactNode, ReactElement<IEmptyProps>];
+}
 
-type TFor = FunctionComponent<TForProps<unknown>> & { Empty: typeof Empty };
+type IForObjectProps<T> = IForObjectWithEmptyProp<T> | IForObjectWithEmptySlot<T>;
 
-export const For: TFor = function For<T>(props: TForProps<T>) {
-  const isObjectMode = hasOwnProperty.call(props, 'in');
-  const hasOf = hasOwnProperty.call(props, 'of');
+type TForProps<T> = IForIterableProps<T> | IForObjectProps<T>;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type TFor = {
+  <T>(props: IForObjectProps<T>): ReactNode;
+  <T>(props: IForIterableProps<T>): ReactNode;
+  Empty: TEmpty;
+};
+
+const ForComponent = function For<T>(props: TForProps<T>): ReactNode {
+  const isObjectMode = Object.prototype.hasOwnProperty.call(props, 'in');
+  const hasOf = Object.prototype.hasOwnProperty.call(props, 'of');
 
   if (isObjectMode && hasOf) {
-    console.warn('Both "in" and "of" provided; "in" will be used');
+    console.warn('Both "in" and "of" provided; using "in"');
   }
 
-  // Force use "in" value even if it's empty and "of" isn't
   const objOrGetter = (props as IForObjectProps<T>).in;
   const iterableOrGetter = !isObjectMode ? (props as IForIterableProps<T>).of : undefined;
 
-  const obj = typeof objOrGetter === 'function' ? objOrGetter() : objOrGetter;
-  const iterable = typeof iterableOrGetter === 'function' ? iterableOrGetter() : iterableOrGetter;
+  const obj = isFunction(objOrGetter) ? objOrGetter() : objOrGetter;
+  const iterable = isFunction(iterableOrGetter) ? iterableOrGetter() : iterableOrGetter;
 
-  const array: T[] | undefined = iterable
-    ? Array.isArray(iterable)
-      ? iterable
+  const array =
+    iterable ?
+      Array.isArray(iterable) ?
+        (iterable as T[])
       : Array.from(iterable)
     : undefined;
 
-  const fallbackProp = props.empty;
   const rawChildren = props.children;
-  const rawChildrenArray: unknown[] = Array.isArray(rawChildren) ? rawChildren : [rawChildren];
+  const childrenArray = Array.isArray(rawChildren) ? rawChildren : [rawChildren];
 
-  const renderChild = rawChildrenArray.find(
-    (child): child is TEntryRenderFn => typeof child === 'function',
-  );
+  const renderFn = childrenArray.find((child): child is TForChildRenderFn<T> =>
+    isFunction(child),
+  ) as TForChildRenderFn<T> | undefined;
 
-  if (!renderChild) {
+  const fallbackSlot = childrenArray.find(
+    (child): child is ReactElement<IEmptyProps> => isValidElement(child) && child.type === Empty,
+  ) as ReactElement<IEmptyProps> | undefined;
+
+  const fallbackProp: TFallback | undefined = props.empty;
+
+  if (!renderFn) {
     console.warn('No render function provided');
     return null;
   }
 
-  const fallbackSlot = rawChildrenArray.find(
-    (child): child is ReactElement<IEmptyProps> => isValidElement(child) && child.type === Empty,
-  );
-
-  if (fallbackProp != null && fallbackSlot != null) {
-    console.warn('Both "empty" prop and <Empty> provided; "empty" will be used');
+  if (fallbackProp != null && fallbackSlot) {
+    console.warn('Both "empty" prop and <Empty> provided; using "empty"');
   }
 
   const fallback: TFallback | undefined = fallbackProp ?? fallbackSlot?.props.children;
@@ -85,13 +112,16 @@ export const For: TFor = function For<T>(props: TForProps<T>) {
   const isEmpty = isObjectMode ? !obj || !Object.keys(obj).length : !array?.length;
 
   if (isEmpty) {
-    const fallbackResult = typeof fallback === 'function' ? fallback() : fallback;
-    return fallbackResult ?? null;
-  } else if (isObjectMode) {
-    return Object.entries(obj!).map(([key, value]) => renderChild(value, key));
-  } else {
-    return array!.map((entry, index) => renderChild(entry, index));
+    const result = isFunction(fallback) ? fallback() : fallback;
+    return result ?? null;
   }
-};
 
+  if (isObjectMode) {
+    return Object.entries(obj!).map(([k, v]) => renderFn(v, k));
+  } else {
+    return array!.map((v, i) => renderFn(v, i));
+  }
+} satisfies FunctionComponent<TForProps<unknown>>;
+
+export const For = ForComponent as TFor;
 For.Empty = Empty;

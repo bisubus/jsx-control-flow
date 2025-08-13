@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from 'react';
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+import { hasOwnProperty, isFunction } from '@/utils';
 
 type TRenderFn = () => ReactNode;
 
@@ -25,37 +25,46 @@ export const Default: FunctionComponent<IDefaultProps> = function Default() {
   return null;
 };
 
-type TSwitchValueGetter<T, TVar = never> = (value?: TVar) => T;
+type TSwitchValueGetter<T> = () => T;
+
+interface ISwitchBaseProps {
+  children:
+    | ReactElement<ICaseProps>
+    | ReactElement<IDefaultProps>
+    | [...ReactElement<ICaseProps>[]]
+    | [...ReactElement<ICaseProps>[], ReactElement<IDefaultProps>];
+}
 
 interface ISwitchValueProps<T = unknown> {
   getValue?: never;
   value: T;
-  children: ReactNode;
 }
 
 interface ISwitchValueGetterProps<T = unknown> {
   getValue: TSwitchValueGetter<T>;
   value?: never;
-  children: ReactNode;
 }
 
-type TSwitchProps<T = unknown> = ISwitchValueGetterProps<T> | ISwitchValueProps<T>;
+type TSwitchProps<T = unknown> = ISwitchBaseProps &
+  (ISwitchValueGetterProps<T> | ISwitchValueProps<T>);
 
-type TSwitch = FunctionComponent<TSwitchProps> & {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type TSwitch = {
+  <T>(props: TSwitchProps<T>): ReactNode;
   Case: typeof Case;
   Default: typeof Default;
 };
 
 function renderNode(node: ReactNode | TRenderFn) {
-  return typeof node === 'function' ? node() : node;
+  return isFunction(node) ? node() : node;
 }
 
-export const Switch: TSwitch = function Switch<T>(props: TSwitchProps<T>) {
+const SwitchComponent = function Switch<T>(props: TSwitchProps<T>): ReactNode {
   const hasValueGetter = hasOwnProperty.call(props, 'getValue');
   const hasValue = hasOwnProperty.call(props, 'value');
 
   if (hasValueGetter && hasValue) {
-    console.warn('Both "getValue" and "value" provided; "getValue" will be used');
+    console.warn('Both "getValue" and "value" provided; using "getValue"');
   }
 
   const value: T = hasValueGetter ? props.getValue!() : props.value!;
@@ -90,7 +99,9 @@ export const Switch: TSwitch = function Switch<T>(props: TSwitchProps<T>) {
   }
 
   return defaultSlot ? renderNode(defaultSlot.props.children) : null;
-};
+} satisfies FunctionComponent<TSwitchProps<unknown>>;
+
+export const Switch = SwitchComponent as TSwitch;
 
 Switch.Case = Case;
 Switch.Default = Default;
