@@ -1,5 +1,9 @@
 # jsx-control-flow
 
+<p align="center">
+  <img src="./assets/logo.svg" width="500" alt="jsx-control-flow" />
+</p>
+
 A lightweight library providing React components for declarative control flow in JSX. The components are supposed to replace short-circuit operators, complex ternaries, `Array.map()`, and IIFEs.
 
 Inspired by frameworks like Vue (`v-for`, `v-if`) and Angular (`@for`, `@if`, `@switch`, `@let`), this library brings similar declarative functionality to React.
@@ -8,7 +12,7 @@ Inspired by frameworks like Vue (`v-for`, `v-if`) and Angular (`@for`, `@if`, `@
 
 When it comes to control flow in React, developers are obliged to rely on imperative constructs like ternary and short-circuit operators, or inline `map()` calls in JSX expressions. This quickly starts to affect the readability and maintainability of the code and makes it error-prone. 
 
-💤 **Before**:
+### 💤 **Before**
 
 ```jsx
 <>
@@ -26,7 +30,7 @@ When it comes to control flow in React, developers are obliged to rely on impera
 </>
 ```
 
-✨ **After**:
+### ✨ **After**
 
 ```jsx
 <Let value={res.data}>{({ user: { role }, tasks }) => (
